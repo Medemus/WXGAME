@@ -14,26 +14,35 @@ cc.Class({
             default: null,
             type: cc.Node
         },
+        u: {
+            default: true,
+            type: cc.Boolean
+        },
     },
 
     Doing(event, data) {
-        this.gamemanager.getComponent("GameManager").Click();
+        if (this.u)
+            this.gamemanager.getComponent("GameManager").Click();
         //this.t.string = data;
     },
 
     ChangeKind(event, data) {
-        this.gamemanager.getComponent("GameManager").ChangeKind(data);
+        if (this.u)
+            this.gamemanager.getComponent("GameManager").ChangeKind(data);
     },
     AddBuff() {
-        this.gamemanager.getComponent("GameManager").AddBuff();
+            this.gamemanager.getComponent("GameManager").AddBuff();
     },
     DeleteBuff() {
-        this.gamemanager.getComponent("GameManager").DeleteBuff();
+        if (this.u)
+            this.gamemanager.getComponent("GameManager").DeleteBuff();
     },
     OpenStore() {
+        this.u = false;
         this.Store.active = true;
     },
     CloseStore() {
+        this.u = true;
         this.Store.active = false;
     },
 });

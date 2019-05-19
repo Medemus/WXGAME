@@ -74,10 +74,10 @@ var ListKind = {
     "Normal": 0,
     "Star": 1,
     "Event": 2
-}//订单种类
+} //订单种类
 var BuffKind = {
 
-}//buff种类
+} //buff种类
 cc.Class({
     extends: cc.Component,
 
@@ -106,10 +106,13 @@ cc.Class({
             default: null,
             type: cc.Label
         },
-        BuffShow:{default:null,type:cc.Node},
-        buffp:cc.Prefab,
+        BuffShow: {
+            default: null,
+            type: cc.Node
+        },
+        buffp: cc.Prefab,
         kind: ListKind.Star,
-        LowMoney:cc.Node,
+        LowMoney: cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -207,20 +210,23 @@ cc.Class({
 
 
     },
-    AddBuff(){
-        if(this.data.money>=10){
-        var node = cc.instantiate(this.buffp);
-        this.data.buffes.push(node);
-        node.parent = this.BuffShow;
-        this.AddMoney(-10);
-        }
-        else{
+    AddBuff() {
+        if (this.data.money >= 10) {
+            var node = cc.instantiate(this.buffp);
+            this.data.buffes.push(node);
+            node.parent = this.BuffShow;
+            this.AddMoney(-10);
+        } else {
             this.LowMoney.active = true;
-            this.scheduleOnce(function(){ this.LowMoney.active = false; },2);
+            this.scheduleOnce(function () {
+                this.LowMoney.active = false;
+            }, 2);
         }
     },
-    DeleteBuff(){
-        var node = this.data.buffes.pop();
-        node.destroy();
+    DeleteBuff() {
+        if (this.data.buffes.length > 0) {
+            var node = this.data.buffes.pop();
+            node.destroy();
+        }
     }
 });
