@@ -10,7 +10,7 @@ cc.Class({
             default: null,
             type: cc.Label
         },
-        lll: {
+        Store: {
             default: null,
             type: cc.Node
         },
@@ -21,7 +21,19 @@ cc.Class({
         //this.t.string = data;
     },
 
-    ChangeKind(event,data){
+    ChangeKind(event, data) {
         this.gamemanager.getComponent("GameManager").ChangeKind(data);
-    }
+    },
+    AddBuff() {
+        this.gamemanager.getComponent("GameManager").AddBuff();
+    },
+    DeleteBuff() {
+        this.gamemanager.getComponent("GameManager").DeleteBuff();
+    },
+    OpenStore() {
+        this.Store.active = true;
+    },
+    CloseStore() {
+        this.Store.active = false;
+    },
 });

@@ -47,12 +47,37 @@ var li = cc.Class({
     }
 })
 
+var Buff = cc.Class({
+    name: Buff,
+    properties: {
+        time: {
+            default: 0,
+            type: cc.Float
+        },
+        name: {
+            default: "unknowname",
+            type: cc.String
+        },
+        kind: {
+            default: null,
+            type: BuffKind
+        },
+        icon: {
+            default: null,
+            type: cc.Node
+        },
+    }
+})
+
+
 var ListKind = {
     "Normal": 0,
     "Star": 1,
     "Event": 2
-}
+}//订单种类
+var BuffKind = {
 
+}//buff种类
 cc.Class({
     extends: cc.Component,
 
@@ -73,7 +98,18 @@ cc.Class({
             default: null,
             type: cc.Label
         },
+        money: {
+            default: null,
+            type: cc.Label
+        },
+        level: {
+            default: null,
+            type: cc.Label
+        },
+        BuffShow:{default:null,type:cc.Node},
+        buffp:cc.Prefab,
         kind: ListKind.Star,
+        LowMoney:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -86,7 +122,15 @@ cc.Class({
     },
 
     start() {
-        //this.List_01.string  = "s";
+        this.kind = ListKind.Normal;
+        this.NewList();
+        this.kind = ListKind.Star;
+        this.NewList();
+        this.kind = ListKind.Event;
+        this.NewList();
+        this.kind = ListKind.Normal;
+        //初始化三种订单表
+        this.level.string = this.data.level;
     },
 
     update(dt) {
@@ -100,13 +144,16 @@ cc.Class({
         } else {
             this.ListonDoing[this.kind].time -= this.data.speed;
             var bili = this.ListonDoing[this.kind].time / this.ListonDoing[this.kind].LastedTime;
-            this.ListShow[this.kind].getChildByName("progressBar").getComponent(cc.ProgressBar).progress =1-bili;
+            this.ListShow[this.kind].getChildByName("progressBar").getComponent(cc.ProgressBar).progress = 1 - bili;
+
+            if (this.ListonDoing[this.kind].time <= 0) {
+                this.AddMoney(10);
+                this.ListonDoing[this.kind] = null;
+                ``
+            }
         }
 
-        if (this.ListonDoing[this.kind].time <= 0) {
-            this.ListonDoing[this.kind] = null;
-            this.NewList();
-        }
+
     },
 
     Click() {
@@ -117,6 +164,14 @@ cc.Class({
     },
     Refrsh(ds) {
         ds.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing[this.kind].name;
+    },
+    AddMoney(num) {
+        this.data.money += num;
+        this.money.string = this.data.money;
+    },
+    AddLV(num) {
+        this.data.level += num;
+        this.level.string = this.data.level;
     },
     NewList() {
 
@@ -130,7 +185,7 @@ cc.Class({
 
     },
     ChangeKind(num) {
-        
+
         switch (num) {
             case "0":
                 this.kind = ListKind.Normal;
@@ -149,7 +204,23 @@ cc.Class({
                 break;
         }
 
-       
 
+
+    },
+    AddBuff(){
+        if(this.data.money>=10){
+        var node = cc.instantiate(this.buffp);
+        this.data.buffes.push(node);
+        node.parent = this.BuffShow;
+        this.AddMoney(-10);
+        }
+        else{
+            this.LowMoney.active = true;
+            this.scheduleOnce(function(){ this.LowMoney.active = false; },2);
+        }
+    },
+    DeleteBuff(){
+        var node = this.data.buffes.pop();
+        node.destroy();
     }
 });
