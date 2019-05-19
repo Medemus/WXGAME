@@ -81,8 +81,8 @@ cc.Class({
     onLoad() {
 
         this.data = new data();
-
-        this.NewList();
+        this.kind = ListKind.Star;
+        //this.NewList();
     },
 
     start() {
@@ -100,7 +100,7 @@ cc.Class({
         } else {
             this.ListonDoing[this.kind].time -= this.data.speed;
             var bili = this.ListonDoing[this.kind].time / this.ListonDoing[this.kind].LastedTime;
-            this.ListShow[this.kind].getChildByName("progressBar").getComponent(cc.ProgressBar).progress = bili;
+            this.ListShow[this.kind].getChildByName("progressBar").getComponent(cc.ProgressBar).progress =1-bili;
         }
 
         if (this.ListonDoing[this.kind].time <= 0) {
