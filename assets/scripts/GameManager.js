@@ -11,7 +11,7 @@ var data = cc.Class({
         }, //等级
         buffes: {
             default: [],
-            type: [cc.Node]
+            type: [Buff]
         }, //buff数组
         List: {
             default: [],
@@ -28,11 +28,11 @@ var data = cc.Class({
 var li = cc.Class({
     name: li,
     properties: {
-        time: {
+        num: {
             default: 0,
             type: cc.Float
         },
-        LastedTime: {
+        Lastednum: {
             default: 0,
             type: cc.Float
         },
@@ -87,53 +87,36 @@ cc.Class({
             type: data
         },
         ListonDoing: {
-            default: [],
-            type: [li]
+            default: null,
+            type: li
         },
         ListShow: {
-            default: [],
-            type: [cc.Node]
+            default: null,
+            type: cc.Node
         },
         la: {
             default: null,
             type: cc.Label
         },
-        money: {
-            default: null,
-            type: cc.Label
-        },
-        level: {
-            default: null,
-            type: cc.Label
-        },
-        BuffShow: {
+        Move: {
             default: null,
             type: cc.Node
         },
-        buffp: cc.Prefab,
+        Showed: false,
+
         kind: ListKind.Star,
-        LowMoney: cc.Node,
+
     },
 
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
 
-        this.data = new data();
-        this.kind = ListKind.Star;
-        //this.NewList();
+
     },
 
     start() {
-        this.kind = ListKind.Normal;
-        this.NewList();
-        this.kind = ListKind.Star;
-        this.NewList();
-        this.kind = ListKind.Event;
-        this.NewList();
-        this.kind = ListKind.Normal;
-        //初始化三种订单表
-        this.level.string = this.data.level;
+
     },
 
     update(dt) {
@@ -141,32 +124,39 @@ cc.Class({
     },
 
     Doing() {
-        this.la.string = this.kind;
-        if (this.ListonDoing[this.kind] == null) {
-            this.NewList();
-        } else {
-            this.ListonDoing[this.kind].time -= this.data.speed;
-            var bili = this.ListonDoing[this.kind].time / this.ListonDoing[this.kind].LastedTime;
-            this.ListShow[this.kind].getChildByName("progressBar").getComponent(cc.ProgressBar).progress = 1 - bili;
-
-            if (this.ListonDoing[this.kind].time <= 0) {
-                this.AddMoney(10);
-                this.ListonDoing[this.kind] = null;
-                ``
+        
+            if (this.ListonDoing == null) {
+                this.Refrsh();
+            } else if(this.Showed){
+                this.ListonDoing.Lastednum += 1;
+                var bili = this.ListonDoing.Lastednum / this.ListonDoing.num;
+                var sheng = this.ListonDoing.num - this.ListonDoing.Lastednum;
+                this.ListShow.getChildByName("list_back").getComponent(cc.Sprite).fillStart = bili;
+                this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要 X"+sheng;
+                if (this.ListonDoing.Lastednum >= this.ListonDoing.num) {
+                    this.Refrsh();
+                }
             }
-        }
-
-
+        
+        
     },
 
     Click() {
-        if (this.ListonDoing[this.kind] != null) {
-            this.ListonDoing[this.kind].time -= 50;
+        if (this.ListonDoing != null&&this.Showed) {
+            this.ListonDoing.Lastednum += 50;
+
         }
 
     },
     Refrsh(ds) {
-        ds.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing[this.kind].name;
+        this.Showed = false;
+        this.ListShow.active = false;
+        this.Move.getComponent("Move").Move();
+        this.NewList();
+        this.scheduleOnce(function () {
+            this.Showed = true;
+            this.ListShow.active = true;
+        }, 0.9)
     },
     AddMoney(num) {
         this.data.money += num;
@@ -179,13 +169,14 @@ cc.Class({
     NewList() {
 
         var temp = new li();
-        temp.time = 100;
-        temp.LastedTime = 100;
+        temp.num = 100;
+        temp.Lastednum = 0;
         temp.name = "s";
         temp.ListType = this.kind;
-        this.ListonDoing[this.kind] = temp;
-        this.Refrsh(this.ListShow[this.kind])
-
+        this.ListonDoing = temp;
+        this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
+        this.ListShow.getChildByName("list_back").getComponent(cc.Sprite).fillStart = 0;
+        this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要:'''X" + this.ListonDoing.num-this.ListonDoing.Lastednum;
     },
     ChangeKind(num) {
 
@@ -213,7 +204,9 @@ cc.Class({
     AddBuff() {
         if (this.data.money >= 10) {
             var node = cc.instantiate(this.buffp);
-            this.data.buffes.push(node);
+            var bu = new Buff();
+            bu.icon = node;
+            this.data.buffes.push(bu);
             node.parent = this.BuffShow;
             this.AddMoney(-10);
         } else {
@@ -225,8 +218,8 @@ cc.Class({
     },
     DeleteBuff() {
         if (this.data.buffes.length > 0) {
-            var node = this.data.buffes.pop();
-            node.destroy();
+            var bu = this.data.buffes.pop();
+            bu.icon.destroy();
         }
     }
 });

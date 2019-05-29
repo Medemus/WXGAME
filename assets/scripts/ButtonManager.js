@@ -18,6 +18,7 @@ cc.Class({
             default: true,
             type: cc.Boolean
         },
+        move:cc.Node,
     },
 
     Doing(event, data) {
@@ -45,4 +46,7 @@ cc.Class({
         this.u = true;
         this.Store.active = false;
     },
+    Move(){
+        this.move.getComponent("Move").Move();
+    }
 });
