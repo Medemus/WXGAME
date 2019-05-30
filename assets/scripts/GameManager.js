@@ -94,16 +94,33 @@ cc.Class({
             default: null,
             type: cc.Node
         },
-        la: {
+        LvShow: {
             default: null,
-            type: cc.Label
+            type: cc.Layout
         },
+
         Move: {
             default: null,
             type: cc.Node
         },
+        money: {
+            default: null,
+            type: cc.Node
+        },
+        inf: {
+            default: null,
+            type: cc.Prefab
+        },
+        button: {
+            default: null,
+            type: cc.Node
+        },
+        ClickNum: {
+            default: 1,
+            type: cc.Integer
+        },
         Showed: false,
-
+        star:cc.Prefab,
         kind: ListKind.Star,
 
     },
@@ -111,12 +128,14 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
-
-
+        this.data = new data();
+        this.list_back = this.ListShow.getChildByName("list_back").getComponent(cc.Sprite);
+        this.nes = this.ListShow.getChildByName("nes").getComponent(cc.Label);
     },
 
     start() {
-
+        this.clickInformPool = new cc.NodePool();
+        this.money.getChildByName("num").getComponent(cc.Label).string = "";
     },
 
     update(dt) {
@@ -124,27 +143,29 @@ cc.Class({
     },
 
     Doing() {
-        
-            if (this.ListonDoing == null) {
+
+        if (this.ListonDoing == null) {
+            this.Refrsh();
+        } else if (this.Showed) {
+            this.ListonDoing.Lastednum += 1;
+            var bili = this.ListonDoing.Lastednum / this.ListonDoing.num;
+            var sheng = this.ListonDoing.num - this.ListonDoing.Lastednum;
+            this.list_back.fillStart = bili;
+            this.nes.string = "需要 X" + sheng;
+            if (this.ListonDoing.Lastednum >= this.ListonDoing.num) {
+                this.AddMoney(20);
+                this.AddLV(1);
                 this.Refrsh();
-            } else if(this.Showed){
-                this.ListonDoing.Lastednum += 1;
-                var bili = this.ListonDoing.Lastednum / this.ListonDoing.num;
-                var sheng = this.ListonDoing.num - this.ListonDoing.Lastednum;
-                this.ListShow.getChildByName("list_back").getComponent(cc.Sprite).fillStart = bili;
-                this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要 X"+sheng;
-                if (this.ListonDoing.Lastednum >= this.ListonDoing.num) {
-                    this.Refrsh();
-                }
             }
-        
-        
+        }
+
+
     },
 
     Click() {
-        if (this.ListonDoing != null&&this.Showed) {
-            this.ListonDoing.Lastednum += 50;
-
+        if (this.ListonDoing != null && this.Showed) {
+            this.ListonDoing.Lastednum += this.ClickNum;
+            this.creatInform(this.ClickNum, this.button);
         }
 
     },
@@ -160,11 +181,13 @@ cc.Class({
     },
     AddMoney(num) {
         this.data.money += num;
-        this.money.string = this.data.money;
+        this.money.getChildByName("num").getComponent(cc.Label).string = this.data.money;
+        this.creatInform(num, this.money);
     },
     AddLV(num) {
         this.data.level += num;
-        this.level.string = this.data.level;
+        let node = cc.instantiate(this.star);
+        node.parent = this.LvShow.node;
     },
     NewList() {
 
@@ -176,7 +199,7 @@ cc.Class({
         this.ListonDoing = temp;
         this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
         this.ListShow.getChildByName("list_back").getComponent(cc.Sprite).fillStart = 0;
-        this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要:'''X" + this.ListonDoing.num-this.ListonDoing.Lastednum;
+        this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要:'''X" + this.ListonDoing.num - this.ListonDoing.Lastednum;
     },
     ChangeKind(num) {
 
@@ -221,5 +244,26 @@ cc.Class({
             var bu = this.data.buffes.pop();
             bu.icon.destroy();
         }
-    }
+    },
+    creatInform(data, node) {
+        let inform = null;
+        if (this.clickInformPool.size > 0) {
+            inform = this.clickInformPool.get();
+        } else {
+            inform = cc.instantiate(this.inf);
+        }
+
+
+
+        inform.parent = this.node;
+
+        inform.getComponent("ini").ini(data, node);
+
+        this.scheduleOnce(function () {
+            this.informKill(inform);
+        }, 2)
+    },
+    informKill(infor) {
+        this.clickInformPool.put(infor);
+    },
 });
