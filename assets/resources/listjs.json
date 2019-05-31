@@ -1,0 +1,27 @@
+{
+    "List": [{
+            "num": 100,
+            "name": "1",
+            "ListType": 0,
+            "money":10
+        },
+        {
+            "num": 200,
+            "name": "2",
+            "ListType": 0,
+            "money":20
+        },
+        {
+            "num": 300,
+            "name": "3",
+            "ListType": 0,
+            "money":30
+        },
+        {
+            "num": 400,
+            "name": "4",
+            "ListType": 0,
+            "money":40
+        }
+    ]
+}

@@ -19,7 +19,7 @@ var data = cc.Class({
         }, //订单数组
         //List = new Array(),
         speed: {
-            default: 0.5,
+            default: 0.1,
             type: cc.Float
         },
     }
@@ -43,6 +43,10 @@ var li = cc.Class({
         ListType: {
             default: null,
             type: ListKind
+        },
+        Money: {
+            default: 0,
+            type: cc.Integer
         },
     }
 })
@@ -120,7 +124,7 @@ cc.Class({
             type: cc.Integer
         },
         Showed: false,
-        star:cc.Prefab,
+        star: cc.Prefab,
         kind: ListKind.Star,
 
     },
@@ -139,7 +143,10 @@ cc.Class({
     },
 
     update(dt) {
-        this.Doing();
+        
+            this.Doing();
+        
+        
     },
 
     Doing() {
@@ -147,13 +154,14 @@ cc.Class({
         if (this.ListonDoing == null) {
             this.Refrsh();
         } else if (this.Showed) {
-            this.ListonDoing.Lastednum += 1;
+            this.ListonDoing.Lastednum += this.data.speed;
+            
             var bili = this.ListonDoing.Lastednum / this.ListonDoing.num;
-            var sheng = this.ListonDoing.num - this.ListonDoing.Lastednum;
+            var sheng = Math.floor( this.ListonDoing.num - this.ListonDoing.Lastednum);
             this.list_back.fillStart = bili;
             this.nes.string = "需要 X" + sheng;
             if (this.ListonDoing.Lastednum >= this.ListonDoing.num) {
-                this.AddMoney(20);
+                this.AddMoney(this.ListonDoing.Money);
                 this.AddLV(1);
                 this.Refrsh();
             }
@@ -176,6 +184,7 @@ cc.Class({
         this.NewList();
         this.scheduleOnce(function () {
             this.Showed = true;
+            this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
             this.ListShow.active = true;
         }, 0.9)
     },
@@ -192,14 +201,20 @@ cc.Class({
     NewList() {
 
         var temp = new li();
-        temp.num = 100;
-        temp.Lastednum = 0;
-        temp.name = "s";
-        temp.ListType = this.kind;
+        this.readList(temp);
+        /*
+                temp.num = 100;
+                temp.Lastednum = 0;
+                temp.name = "s";
+                temp.ListType = this.kind;
+                */
+        
         this.ListonDoing = temp;
-        this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
+        //console.log(this.ListonDoing);
+        //this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
         this.ListShow.getChildByName("list_back").getComponent(cc.Sprite).fillStart = 0;
         this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要:'''X" + this.ListonDoing.num - this.ListonDoing.Lastednum;
+        
     },
     ChangeKind(num) {
 
@@ -266,4 +281,28 @@ cc.Class({
     informKill(infor) {
         this.clickInformPool.put(infor);
     },
+    readList(temp) {
+
+
+        cc.loader.loadRes('listjs.json', function (err, object) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            var l = object.json.List;
+            var i = Math.floor(Math.random() * l.length);
+
+            temp.num = l[i].num;
+            temp.Lastednum = 0;
+            temp.name = l[i].name;
+            temp.ListType = l[i].ListType;
+            temp.Money = l[i].money;
+            
+            console.log(temp.name + "," + temp.num);
+
+            //console.log(i);
+        });
+
+        console.log(temp);
+    }
 });
