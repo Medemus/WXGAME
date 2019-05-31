@@ -2,26 +2,33 @@
     "List": [{
             "num": 100,
             "name": "1",
-            "ListType": 0,
+            "ListType": 1,
             "money":10
         },
         {
             "num": 200,
             "name": "2",
-            "ListType": 0,
+            "ListType": 1,
             "money":20
         },
         {
             "num": 300,
             "name": "3",
-            "ListType": 0,
+            "ListType": 1,
             "money":30
         },
         {
             "num": 400,
             "name": "4",
-            "ListType": 0,
+            "ListType": 1,
             "money":40
         }
-    ]
+    ],
+    "Buff":[{
+        "name":"1",
+        "time":100,
+        "addnum":0,
+        "auto":true,
+        "autonum":0
+    }]
 }

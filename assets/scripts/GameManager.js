@@ -1,3 +1,4 @@
+var c = require("common")
 var data = cc.Class({
     name: data,
     properties: {
@@ -11,7 +12,7 @@ var data = cc.Class({
         }, //等级
         buffes: {
             default: [],
-            type: [Buff]
+            type: [cc.Node]
         }, //buff数组
         List: {
             default: [],
@@ -19,7 +20,7 @@ var data = cc.Class({
         }, //订单数组
         //List = new Array(),
         speed: {
-            default: 0.1,
+            default: 0,
             type: cc.Float
         },
     }
@@ -41,8 +42,8 @@ var li = cc.Class({
             type: cc.String
         },
         ListType: {
-            default: null,
-            type: ListKind
+            default: 0,
+            type: cc.Integer
         },
         Money: {
             default: 0,
@@ -51,37 +52,6 @@ var li = cc.Class({
     }
 })
 
-var Buff = cc.Class({
-    name: Buff,
-    properties: {
-        time: {
-            default: 0,
-            type: cc.Float
-        },
-        name: {
-            default: "unknowname",
-            type: cc.String
-        },
-        kind: {
-            default: null,
-            type: BuffKind
-        },
-        icon: {
-            default: null,
-            type: cc.Node
-        },
-    }
-})
-
-
-var ListKind = {
-    "Normal": 0,
-    "Star": 1,
-    "Event": 2
-} //订单种类
-var BuffKind = {
-
-} //buff种类
 cc.Class({
     extends: cc.Component,
 
@@ -123,9 +93,9 @@ cc.Class({
             default: 1,
             type: cc.Integer
         },
+        
         Showed: false,
         star: cc.Prefab,
-        kind: ListKind.Star,
 
     },
 
@@ -135,11 +105,14 @@ cc.Class({
         this.data = new data();
         this.list_back = this.ListShow.getChildByName("list_back").getComponent(cc.Sprite);
         this.nes = this.ListShow.getChildByName("nes").getComponent(cc.Label);
+        
+        
     },
 
     start() {
         this.clickInformPool = new cc.NodePool();
         this.money.getChildByName("num").getComponent(cc.Label).string = "";
+        this.kind = 0;
     },
 
     update(dt) {
@@ -154,6 +127,7 @@ cc.Class({
         if (this.ListonDoing == null) {
             this.Refrsh();
         } else if (this.Showed) {
+            
             this.ListonDoing.Lastednum += this.data.speed;
             
             var bili = this.ListonDoing.Lastednum / this.ListonDoing.num;
@@ -162,8 +136,11 @@ cc.Class({
             this.nes.string = "需要 X" + sheng;
             if (this.ListonDoing.Lastednum >= this.ListonDoing.num) {
                 this.AddMoney(this.ListonDoing.Money);
-                this.AddLV(1);
+                if(this.ListonDoing.ListType==1){
+                    this.AddLV(1);
+                }
                 this.Refrsh();
+                
             }
         }
 
@@ -182,6 +159,7 @@ cc.Class({
         this.ListShow.active = false;
         this.Move.getComponent("Move").Move();
         this.NewList();
+        
         this.scheduleOnce(function () {
             this.Showed = true;
             this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
@@ -214,32 +192,16 @@ cc.Class({
         //this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
         this.ListShow.getChildByName("list_back").getComponent(cc.Sprite).fillStart = 0;
         this.ListShow.getChildByName("nes").getComponent(cc.Label).string = "需要:'''X" + this.ListonDoing.num - this.ListonDoing.Lastednum;
-        
+        //console.log(this.ListonDoing.ListType);
     },
-    ChangeKind(num) {
 
-        switch (num) {
-            case "0":
-                this.kind = ListKind.Normal;
-                this.la.string = ListKind.Normal;
-                break;
+    AddBuff(num) {
+
+        switch(num){
             case "1":
-                this.kind = ListKind.Star;
-                this.la.string = ListKind.Star;
-                break;
-            case "2":
-                this.kind = ListKind.Event;
-                this.la.string = ListKind.Event;
-                break;
-            default:
-                this.la.string = "break";
-                break;
         }
 
 
-
-    },
-    AddBuff() {
         if (this.data.money >= 10) {
             var node = cc.instantiate(this.buffp);
             var bu = new Buff();
@@ -283,26 +245,17 @@ cc.Class({
     },
     readList(temp) {
 
+        
+        var l = c.data.json.List;
+        var i = Math.floor(Math.random() * l.length);
 
-        cc.loader.loadRes('listjs.json', function (err, object) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            var l = object.json.List;
-            var i = Math.floor(Math.random() * l.length);
+        temp.num = l[i].num;
+        temp.Lastednum = 0;
+        temp.name = l[i].name;
+        temp.ListType = l[i].ListType;
+        temp.Money = l[i].money;
 
-            temp.num = l[i].num;
-            temp.Lastednum = 0;
-            temp.name = l[i].name;
-            temp.ListType = l[i].ListType;
-            temp.Money = l[i].money;
-            
-            console.log(temp.name + "," + temp.num);
-
-            //console.log(i);
-        });
-
-        console.log(temp);
-    }
+        console.log(temp.ListType);
+    },
+    
 });

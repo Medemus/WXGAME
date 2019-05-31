@@ -1,23 +1,34 @@
-
+var c = require("common")
 cc.Class({
     extends: cc.Component,
 
     properties: {
-        spr:cc.Sprite,
+        
     },
 
     // LIFE-CYCLE CALLBACKS:
 
-    // onLoad () {},
+     onLoad () {
+         this.readjson();
+     },
 
     start () {
-
+        cc.director.loadScene("mmm");
     },
 
      update (dt) {
-         this.spr.fillStart+=0.01;
-         if(this.spr.fillStart>=1){
-             this.spr.fillStart=0;
-         }
+         
      },
+     readjson(){
+        
+        cc.loader.loadRes('listjs.json', function (err, object) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            c.data = object;
+
+        });
+    }
 });
