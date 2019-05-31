@@ -23,12 +23,5 @@
             "ListType": 1,
             "money":40
         }
-    ],
-    "Buff":[{
-        "name":"1",
-        "time":100,
-        "addnum":0,
-        "auto":true,
-        "autonum":0
-    }]
+    ]
 }

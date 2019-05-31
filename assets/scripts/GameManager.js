@@ -93,10 +93,21 @@ cc.Class({
             default: 1,
             type: cc.Integer
         },
-        
+        buffprefab: {
+            default: [],
+            type: cc.Prefab
+        },
+        BuffShow: {
+            default: null,
+            type: cc.Layout
+        },
+        LowMoney: {
+            default: null,
+            type: cc.Node
+        },
         Showed: false,
         star: cc.Prefab,
-
+        
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -105,21 +116,23 @@ cc.Class({
         this.data = new data();
         this.list_back = this.ListShow.getChildByName("list_back").getComponent(cc.Sprite);
         this.nes = this.ListShow.getChildByName("nes").getComponent(cc.Label);
-        
-        
+
+
     },
 
     start() {
         this.clickInformPool = new cc.NodePool();
         this.money.getChildByName("num").getComponent(cc.Label).string = "";
         this.kind = 0;
+        this.AddMoney(200);
+        
     },
 
     update(dt) {
-        
-            this.Doing();
-        
-        
+
+        this.Doing();
+
+
     },
 
     Doing() {
@@ -127,20 +140,20 @@ cc.Class({
         if (this.ListonDoing == null) {
             this.Refrsh();
         } else if (this.Showed) {
-            
-            this.ListonDoing.Lastednum += this.data.speed;
-            
+            if (this.data.buffes[1] != null)
+                this.ListonDoing.Lastednum += this.data.buffes[1].getComponent("Buff").autonum;
+
             var bili = this.ListonDoing.Lastednum / this.ListonDoing.num;
-            var sheng = Math.floor( this.ListonDoing.num - this.ListonDoing.Lastednum);
+            var sheng = Math.floor(this.ListonDoing.num - this.ListonDoing.Lastednum);
             this.list_back.fillStart = bili;
             this.nes.string = "需要 X" + sheng;
             if (this.ListonDoing.Lastednum >= this.ListonDoing.num) {
                 this.AddMoney(this.ListonDoing.Money);
-                if(this.ListonDoing.ListType==1){
+                if (this.ListonDoing.ListType == 1) {
                     this.AddLV(1);
                 }
                 this.Refrsh();
-                
+
             }
         }
 
@@ -149,8 +162,11 @@ cc.Class({
 
     Click() {
         if (this.ListonDoing != null && this.Showed) {
-            this.ListonDoing.Lastednum += this.ClickNum;
-            this.creatInform(this.ClickNum, this.button);
+            let num = this.ClickNum;
+            if (this.data.buffes[0] != null)
+                num += this.data.buffes[0].getComponent("Buff").addnum;
+            this.ListonDoing.Lastednum += num;
+            this.creatInform(num, this.button);
         }
 
     },
@@ -159,7 +175,7 @@ cc.Class({
         this.ListShow.active = false;
         this.Move.getComponent("Move").Move();
         this.NewList();
-        
+
         this.scheduleOnce(function () {
             this.Showed = true;
             this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
@@ -186,7 +202,7 @@ cc.Class({
                 temp.name = "s";
                 temp.ListType = this.kind;
                 */
-        
+
         this.ListonDoing = temp;
         //console.log(this.ListonDoing);
         //this.ListShow.getChildByName("name").getComponent(cc.Label).string = this.ListonDoing.name;
@@ -197,24 +213,76 @@ cc.Class({
 
     AddBuff(num) {
 
-        switch(num){
+        switch (num) {
+            case "0":
+                
+                if (this.data.buffes[0] == null) {
+                    var temp = cc.instantiate(this.buffprefab[0]);
+                    if (this.data.money >= temp.getComponent("Buff").money) {
+                        this.data.buffes[0] = temp;
+                        temp.parent = this.BuffShow.node;
+                        this.AddMoney(-temp.getComponent("Buff").money);
+                        this.data.buffes[0].getComponent("Buff").money *= 2;
+                        console.log(temp.getComponent("Buff").describ);
+                    } else {
+                        this.LowMoney.active = true;
+                        this.scheduleOnce(function () {
+                            this.LowMoney.active = false;
+                        }, 2);
+                    }
+                }else{
+                    if (this.data.money >= this.data.buffes[0].getComponent("Buff").money) {
+                        
+                        this.AddMoney(-this.data.buffes[0].getComponent("Buff").money);
+                        console.log(this.data.buffes[0].getComponent("Buff").money);
+                        this.data.buffes[0].getComponent("Buff").Upgrade();
+                    } else {
+                        this.LowMoney.active = true;
+                        this.scheduleOnce(function () {
+                            this.LowMoney.active = false;
+                        }, 2);
+                    }
+                }
+               
+                break;
             case "1":
+                    if (this.data.buffes[1] == null) {
+                        var temp = cc.instantiate(this.buffprefab[1]);
+                        if (this.data.money >= temp.getComponent("Buff").money) {
+                            this.data.buffes[1] = temp;
+                            temp.parent = this.BuffShow.node;
+                            this.AddMoney(-temp.getComponent("Buff").money);
+                            this.data.buffes[1].getComponent("Buff").money *= 2;
+                            console.log(temp.getComponent("Buff").describ);
+                        } else {
+                            this.LowMoney.active = true;
+                            this.scheduleOnce(function () {
+                                this.LowMoney.active = false;
+                            }, 2);
+                        }
+                    }else{
+                        if (this.data.money >= this.data.buffes[1].getComponent("Buff").money) {
+                            
+                            this.AddMoney(-this.data.buffes[1].getComponent("Buff").money);
+                            console.log(this.data.buffes[1].getComponent("Buff").money);
+                            this.data.buffes[1].getComponent("Buff").Upgrade();
+                        } else {
+                            this.LowMoney.active = true;
+                            this.scheduleOnce(function () {
+                                this.LowMoney.active = false;
+                            }, 2);
+                        }
+                    }
+                   
+                    break;
+            default:
+                console.log(num);
+                break;
+
         }
 
 
-        if (this.data.money >= 10) {
-            var node = cc.instantiate(this.buffp);
-            var bu = new Buff();
-            bu.icon = node;
-            this.data.buffes.push(bu);
-            node.parent = this.BuffShow;
-            this.AddMoney(-10);
-        } else {
-            this.LowMoney.active = true;
-            this.scheduleOnce(function () {
-                this.LowMoney.active = false;
-            }, 2);
-        }
+
     },
     DeleteBuff() {
         if (this.data.buffes.length > 0) {
@@ -245,7 +313,7 @@ cc.Class({
     },
     readList(temp) {
 
-        
+
         var l = c.data.json.List;
         var i = Math.floor(Math.random() * l.length);
 
@@ -257,5 +325,5 @@ cc.Class({
 
         console.log(temp.ListType);
     },
-    
+
 });
